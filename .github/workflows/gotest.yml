@@ -31,12 +31,16 @@ jobs:
           version: 2022.1.3
 
       - name: Run golangci-lint
+        run: cd ./backend
         uses: golangci/golangci-lint-action@v3
         with:
           version: v1.53.3
+        run: cd ..
 
       - name: Run gofmt
+        run: cd ./backend
         uses: Jerome1337/gofmt-action@v1.0.5
         with:
-          gofmt-path: ./backend/
+          gofmt-path: ./
           gofmt-flags: -l -d
+        run: cd ..
