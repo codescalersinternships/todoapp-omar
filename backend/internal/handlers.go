@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"database/sql"
 	"net/http"
 	"strconv"
 
@@ -13,8 +14,8 @@ type task struct {
 	Is_completed string `json:"is_completed"`
 }
 
-func getTasks(c *gin.Context) {
-	rows, err := Client.Query("SELECT * FROM tasks ORDER BY id;")
+func getTasks(c *gin.Context, client *sql.DB) {
+	rows, err := client.Query("SELECT * FROM tasks ORDER BY id;")
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		return
@@ -34,14 +35,14 @@ func getTasks(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, data)
 }
 
-func addTask(c *gin.Context) {
+func addTask(c *gin.Context, client *sql.DB) {
 	var newTask task
 	if err := c.BindJSON(&newTask); err != nil {
 		c.Status(http.StatusBadRequest)
 		return
 	}
 
-	res, err := Client.Exec("INSERT INTO tasks(title) VALUES(?);", newTask.Title)
+	res, err := client.Exec("INSERT INTO tasks(title) VALUES(?);", newTask.Title)
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		return
@@ -59,7 +60,7 @@ func addTask(c *gin.Context) {
 	c.IndentedJSON(http.StatusCreated, newTask)
 }
 
-func editTask(c *gin.Context) {
+func editTask(c *gin.Context, client *sql.DB) {
 	id := c.Param("id")
 
 	var editedTask task
@@ -68,7 +69,7 @@ func editTask(c *gin.Context) {
 		return
 	}
 
-	_, err := Client.Exec("UPDATE tasks set title = ?, is_completed = ? where id = ?;", editedTask.Title, editedTask.Is_completed, id)
+	_, err := client.Exec("UPDATE tasks set title = ?, is_completed = ? where id = ?;", editedTask.Title, editedTask.Is_completed, id)
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		return
@@ -77,10 +78,10 @@ func editTask(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, editedTask)
 }
 
-func deleteTask(c *gin.Context) {
+func deleteTask(c *gin.Context, client *sql.DB) {
 	id := c.Param("id")
 
-	_, err := Client.Exec("DELETE FROM tasks where id = ?;", id)
+	_, err := client.Exec("DELETE FROM tasks where id = ?;", id)
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		return

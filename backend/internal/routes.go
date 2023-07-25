@@ -1,14 +1,23 @@
 package internal
 
-import "github.com/gin-gonic/gin"
+import (
+	"github.com/gin-gonic/gin"
+)
 
-// Routes handles the routes of the app
-func Routes(route *gin.Engine) {
-	task := route.Group("/task")
+func (a *App) setRoutes() {
+	task := a.Router.Group("/task")
 	{
-		task.GET("/", getTasks)
-		task.POST("/", addTask)
-		task.PUT("/:id", editTask)
-		task.DELETE("/:id", deleteTask)
+		task.GET("/", func(ctx *gin.Context) {
+			getTasks(ctx, a.Client)
+		})
+		task.POST("/", func(ctx *gin.Context) {
+			addTask(ctx, a.Client)
+		})
+		task.PUT("/:id", func(ctx *gin.Context) {
+			editTask(ctx, a.Client)
+		})
+		task.DELETE("/:id", func(ctx *gin.Context) {
+			deleteTask(ctx, a.Client)
+		})
 	}
 }

@@ -1,21 +1,20 @@
 package main
 
 import (
+	"flag"
 	"log"
 
 	"github.com/codescalersinternships/todoapp-omar/internal"
-	"github.com/gin-gonic/gin"
 )
 
 func main() {
-	if err := internal.SetupDB(); err != nil {
-		log.Fatal(err)
-	}
-	defer internal.Client.Close()
+	var dbFilePath string
+	flag.StringVar(&dbFilePath, "d", "./todoapp.db", "Specify the filepath of sqlite database")
+	flag.Parse()
 
-	router := gin.Default()
-	internal.Routes(router)
-	if err := router.Run(":8080"); err != nil {
+	app := internal.NewApp()
+
+	if err := app.Run(dbFilePath); err != nil {
 		log.Fatal(err)
 	}
 }

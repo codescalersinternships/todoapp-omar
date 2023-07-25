@@ -12,12 +12,13 @@ import (
 )
 
 func TestAddTask(t *testing.T) {
-	err := SetupDB()
+	app := NewApp()
+	err := app.startDB("./todoapp.db")
 	assert.Nil(t, err)
-	defer Client.Close()
+	defer app.closeDB()
 
-	router := gin.Default()
-	Routes(router)
+	app.Router = gin.Default()
+	app.setRoutes()
 
 	t.Run("valid", func(t *testing.T) {
 		newTask := map[string]string{
@@ -31,7 +32,7 @@ func TestAddTask(t *testing.T) {
 
 		w := httptest.NewRecorder()
 
-		router.ServeHTTP(w, req)
+		app.Router.ServeHTTP(w, req)
 
 		if w.Code != http.StatusCreated {
 			t.Errorf("Expected status code %d, but got %d", http.StatusCreated, w.Code)
@@ -50,7 +51,7 @@ func TestAddTask(t *testing.T) {
 
 		w := httptest.NewRecorder()
 
-		router.ServeHTTP(w, req)
+		app.Router.ServeHTTP(w, req)
 
 		if w.Code != http.StatusBadRequest {
 			t.Errorf("Expected status code %d, but got %d", http.StatusBadRequest, w.Code)
@@ -59,19 +60,20 @@ func TestAddTask(t *testing.T) {
 }
 
 func TestGetTasks(t *testing.T) {
-	err := SetupDB()
+	app := NewApp()
+	err := app.startDB("./todoapp.db")
 	assert.Nil(t, err)
-	defer Client.Close()
+	defer app.closeDB()
 
-	router := gin.Default()
-	Routes(router)
+	app.Router = gin.Default()
+	app.setRoutes()
 
 	req, err := http.NewRequest("GET", "/task/", nil)
 	assert.Nil(t, err)
 
 	w := httptest.NewRecorder()
 
-	router.ServeHTTP(w, req)
+	app.Router.ServeHTTP(w, req)
 
 	if w.Code != http.StatusOK {
 		t.Errorf("Expected status code %d, but got %d", http.StatusOK, w.Code)
@@ -79,12 +81,13 @@ func TestGetTasks(t *testing.T) {
 }
 
 func TestEditTask(t *testing.T) {
-	err := SetupDB()
+	app := NewApp()
+	err := app.startDB("./todoapp.db")
 	assert.Nil(t, err)
-	defer Client.Close()
+	defer app.closeDB()
 
-	router := gin.Default()
-	Routes(router)
+	app.Router = gin.Default()
+	app.setRoutes()
 
 	t.Run("valid", func(t *testing.T) {
 		editedTask := map[string]string{
@@ -99,7 +102,7 @@ func TestEditTask(t *testing.T) {
 		req.Header.Set("Content-Type", "application/json")
 
 		w := httptest.NewRecorder()
-		router.ServeHTTP(w, req)
+		app.Router.ServeHTTP(w, req)
 
 		if w.Code != http.StatusOK {
 			t.Errorf("Expected status code %d, but got %d", http.StatusOK, w.Code)
@@ -119,7 +122,7 @@ func TestEditTask(t *testing.T) {
 		req.Header.Set("Content-Type", "application/json")
 
 		w := httptest.NewRecorder()
-		router.ServeHTTP(w, req)
+		app.Router.ServeHTTP(w, req)
 
 		if w.Code != http.StatusBadRequest {
 			t.Errorf("Expected status code %d, but got %d", http.StatusBadRequest, w.Code)
@@ -128,19 +131,20 @@ func TestEditTask(t *testing.T) {
 }
 
 func TestDeleteTask(t *testing.T) {
-	err := SetupDB()
+	app := NewApp()
+	err := app.startDB("./todoapp.db")
 	assert.Nil(t, err)
-	defer Client.Close()
+	defer app.closeDB()
 
-	router := gin.Default()
-	Routes(router)
+	app.Router = gin.Default()
+	app.setRoutes()
 
 	req, err := http.NewRequest("DELETE", "/task/1", nil)
 	assert.Nil(t, err)
 
 	w := httptest.NewRecorder()
 
-	router.ServeHTTP(w, req)
+	app.Router.ServeHTTP(w, req)
 
 	if w.Code != http.StatusOK {
 		t.Errorf("Expected status code %d, but got %d", http.StatusOK, w.Code)
