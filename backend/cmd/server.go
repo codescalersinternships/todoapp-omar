@@ -12,7 +12,10 @@ func main() {
 	flag.StringVar(&dbFilePath, "d", "./todoapp.db", "Specify the filepath of sqlite database")
 	flag.Parse()
 
-	app := internal.NewApp()
+	// database client declaration
+	client := internal.DBClient{}
+
+	app := internal.NewApp(client)
 
 	if err := app.Run(dbFilePath); err != nil {
 		log.Fatal(err)

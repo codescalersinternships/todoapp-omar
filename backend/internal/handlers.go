@@ -1,76 +1,68 @@
 package internal
 
 import (
-	"database/sql"
+	"errors"
+	"log"
 	"net/http"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
 
 type task struct {
-	Id           string `json:"id"`
+	Id           int    `json:"id"`
 	Title        string `json:"title"`
-	Is_completed string `json:"is_completed"`
+	Is_completed bool   `json:"is_completed"`
 }
 
-func getTasks(c *gin.Context, client *sql.DB) {
-	rows, err := client.Query("SELECT * FROM tasks ORDER BY id;")
+func getTasks(c *gin.Context, client DBClient) {
+	tasks, err := client.getTasks()
+
 	if err != nil {
+		log.Fatal(err)
 		c.Status(http.StatusInternalServerError)
 		return
 	}
-	defer rows.Close()
 
-	data := []task{}
-
-	for rows.Next() {
-		t := task{}
-		if err := rows.Scan(&t.Id, &t.Title, &t.Is_completed); err != nil {
-			c.Status(http.StatusInternalServerError)
-			return
-		}
-		data = append(data, t)
-	}
-	c.IndentedJSON(http.StatusOK, data)
+	c.IndentedJSON(http.StatusOK, tasks)
 }
 
-func addTask(c *gin.Context, client *sql.DB) {
+func addTask(c *gin.Context, client DBClient) {
 	var newTask task
 	if err := c.BindJSON(&newTask); err != nil {
+		log.Fatal(err)
 		c.Status(http.StatusBadRequest)
 		return
 	}
 
-	res, err := client.Exec("INSERT INTO tasks(title) VALUES(?);", newTask.Title)
+	newTask, err := client.addTask(newTask)
+
 	if err != nil {
+		log.Fatal(err)
 		c.Status(http.StatusInternalServerError)
 		return
 	}
-
-	id, err := res.LastInsertId()
-	if err != nil {
-		c.Status(http.StatusInternalServerError)
-		return
-	}
-
-	newTask.Id = strconv.Itoa(int(id))
-	newTask.Is_completed = "false"
 
 	c.IndentedJSON(http.StatusCreated, newTask)
 }
 
-func editTask(c *gin.Context, client *sql.DB) {
+func editTask(c *gin.Context, client DBClient) {
 	id := c.Param("id")
 
 	var editedTask task
 	if err := c.BindJSON(&editedTask); err != nil {
+		log.Fatal(err)
 		c.Status(http.StatusBadRequest)
 		return
 	}
 
-	_, err := client.Exec("UPDATE tasks set title = ?, is_completed = ? where id = ?;", editedTask.Title, editedTask.Is_completed, id)
-	if err != nil {
+	if err := client.editTask(id, editedTask); err != nil {
+
+		if errors.Is(err, errTaskNotFound) {
+			c.Status(http.StatusNotFound)
+			return
+		}
+
+		log.Fatal(err)
 		c.Status(http.StatusInternalServerError)
 		return
 	}
@@ -78,11 +70,17 @@ func editTask(c *gin.Context, client *sql.DB) {
 	c.IndentedJSON(http.StatusOK, editedTask)
 }
 
-func deleteTask(c *gin.Context, client *sql.DB) {
+func deleteTask(c *gin.Context, client DBClient) {
 	id := c.Param("id")
 
-	_, err := client.Exec("DELETE FROM tasks where id = ?;", id)
-	if err != nil {
+	if err := client.deleteTask(id); err != nil {
+
+		if errors.Is(err, errTaskNotFound) {
+			c.Status(http.StatusNotFound)
+			return
+		}
+
+		log.Fatal(err)
 		c.Status(http.StatusInternalServerError)
 		return
 	}

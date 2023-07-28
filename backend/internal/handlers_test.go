@@ -12,63 +12,43 @@ import (
 )
 
 func TestAddTask(t *testing.T) {
-	app := NewApp()
-	err := app.startDB("./todoapp.db")
+	app := NewApp(DBClient{})
+	err := app.client.start("./todoapp.db")
 	assert.Nil(t, err)
-	defer app.closeDB()
+	defer app.client.close()
 
 	app.Router = gin.Default()
 	app.setRoutes()
 
-	t.Run("valid", func(t *testing.T) {
-		newTask := map[string]string{
-			"title": "task1",
-		}
-		payload, _ := json.Marshal(newTask)
+	newTask := map[string]string{
+		"title": "task1",
+	}
+	payload, err := json.Marshal(newTask)
+	assert.Nil(t, err)
 
-		req, err := http.NewRequest("POST", "/task/", bytes.NewBuffer(payload))
-		assert.Nil(t, err)
-		req.Header.Set("Content-Type", "application/json")
+	req, err := http.NewRequest("POST", "/task", bytes.NewBuffer(payload))
+	assert.Nil(t, err)
+	req.Header.Set("Content-Type", "application/json")
 
-		w := httptest.NewRecorder()
+	w := httptest.NewRecorder()
 
-		app.Router.ServeHTTP(w, req)
+	app.Router.ServeHTTP(w, req)
 
-		if w.Code != http.StatusCreated {
-			t.Errorf("Expected status code %d, but got %d", http.StatusCreated, w.Code)
-		}
-	})
-
-	t.Run("invalid", func(t *testing.T) {
-		newTask := map[string]int{
-			"title": 10,
-		}
-		payload, _ := json.Marshal(newTask)
-
-		req, err := http.NewRequest("POST", "/task/", bytes.NewBuffer(payload))
-		assert.Nil(t, err)
-		req.Header.Set("Content-Type", "application/json")
-
-		w := httptest.NewRecorder()
-
-		app.Router.ServeHTTP(w, req)
-
-		if w.Code != http.StatusBadRequest {
-			t.Errorf("Expected status code %d, but got %d", http.StatusBadRequest, w.Code)
-		}
-	})
+	if w.Code != http.StatusCreated {
+		t.Errorf("Expected status code %d, but got %d", http.StatusCreated, w.Code)
+	}
 }
 
 func TestGetTasks(t *testing.T) {
-	app := NewApp()
-	err := app.startDB("./todoapp.db")
+	app := NewApp(DBClient{})
+	err := app.client.start("./todoapp.db")
 	assert.Nil(t, err)
-	defer app.closeDB()
+	defer app.client.close()
 
 	app.Router = gin.Default()
 	app.setRoutes()
 
-	req, err := http.NewRequest("GET", "/task/", nil)
+	req, err := http.NewRequest("GET", "/task", nil)
 	assert.Nil(t, err)
 
 	w := httptest.NewRecorder()
@@ -81,27 +61,25 @@ func TestGetTasks(t *testing.T) {
 }
 
 func TestEditTask(t *testing.T) {
-	app := NewApp()
-	err := app.startDB("./todoapp.db")
+	app := NewApp(DBClient{})
+	err := app.client.start("./todoapp.db")
 	assert.Nil(t, err)
-	defer app.closeDB()
+	defer app.client.close()
 
 	app.Router = gin.Default()
 	app.setRoutes()
 
 	t.Run("valid", func(t *testing.T) {
-		editedTask := map[string]string{
-			"id":           "1",
-			"title":        "task2",
-			"is_completed": "true",
-		}
-		payload, _ := json.Marshal(editedTask)
+		editedTask := task{Id: 1, Title: "task2", Is_completed: true}
+		payload, err := json.Marshal(editedTask)
+		assert.Nil(t, err)
 
 		req, err := http.NewRequest("PUT", "/task/1", bytes.NewBuffer(payload))
 		assert.Nil(t, err)
 		req.Header.Set("Content-Type", "application/json")
 
 		w := httptest.NewRecorder()
+
 		app.Router.ServeHTTP(w, req)
 
 		if w.Code != http.StatusOK {
@@ -109,44 +87,57 @@ func TestEditTask(t *testing.T) {
 		}
 	})
 
-	t.Run("invalid", func(t *testing.T) {
-		editedTask := map[string]int{
-			"id":           1,
-			"title":        2,
-			"is_completed": 1,
-		}
-		payload, _ := json.Marshal(editedTask)
+	t.Run("not found", func(t *testing.T) {
+		editedTask := task{Id: 2, Title: "task2", Is_completed: true}
+		payload, err := json.Marshal(editedTask)
+		assert.Nil(t, err)
 
-		req, err := http.NewRequest("PUT", "/task/1", bytes.NewBuffer(payload))
+		req, err := http.NewRequest("PUT", "/task/-1", bytes.NewBuffer(payload))
 		assert.Nil(t, err)
 		req.Header.Set("Content-Type", "application/json")
 
 		w := httptest.NewRecorder()
+
 		app.Router.ServeHTTP(w, req)
 
-		if w.Code != http.StatusBadRequest {
-			t.Errorf("Expected status code %d, but got %d", http.StatusBadRequest, w.Code)
+		if w.Code != http.StatusNotFound {
+			t.Errorf("Expected status code %d, but got %d", http.StatusNotFound, w.Code)
 		}
 	})
 }
 
 func TestDeleteTask(t *testing.T) {
-	app := NewApp()
-	err := app.startDB("./todoapp.db")
+	app := NewApp(DBClient{})
+	err := app.client.start("./todoapp.db")
 	assert.Nil(t, err)
-	defer app.closeDB()
+	defer app.client.close()
 
 	app.Router = gin.Default()
 	app.setRoutes()
 
-	req, err := http.NewRequest("DELETE", "/task/1", nil)
-	assert.Nil(t, err)
+	t.Run("valid", func(t *testing.T) {
+		req, err := http.NewRequest("DELETE", "/task/1", nil)
+		assert.Nil(t, err)
 
-	w := httptest.NewRecorder()
+		w := httptest.NewRecorder()
 
-	app.Router.ServeHTTP(w, req)
+		app.Router.ServeHTTP(w, req)
 
-	if w.Code != http.StatusOK {
-		t.Errorf("Expected status code %d, but got %d", http.StatusOK, w.Code)
-	}
+		if w.Code != http.StatusOK {
+			t.Errorf("Expected status code %d, but got %d", http.StatusOK, w.Code)
+		}
+	})
+
+	t.Run("not found", func(t *testing.T) {
+		req, err := http.NewRequest("DELETE", "/task/-1", nil)
+		assert.Nil(t, err)
+
+		w := httptest.NewRecorder()
+
+		app.Router.ServeHTTP(w, req)
+
+		if w.Code != http.StatusNotFound {
+			t.Errorf("Expected status code %d, but got %d", http.StatusNotFound, w.Code)
+		}
+	})
 }

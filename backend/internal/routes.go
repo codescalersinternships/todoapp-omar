@@ -5,19 +5,16 @@ import (
 )
 
 func (a *App) setRoutes() {
-	task := a.Router.Group("/task")
-	{
-		task.GET("/", func(ctx *gin.Context) {
-			getTasks(ctx, a.Client)
-		})
-		task.POST("/", func(ctx *gin.Context) {
-			addTask(ctx, a.Client)
-		})
-		task.PUT("/:id", func(ctx *gin.Context) {
-			editTask(ctx, a.Client)
-		})
-		task.DELETE("/:id", func(ctx *gin.Context) {
-			deleteTask(ctx, a.Client)
-		})
-	}
+	a.Router.GET("task", func(ctx *gin.Context) {
+		getTasks(ctx, a.client)
+	})
+	a.Router.POST("task", func(ctx *gin.Context) {
+		addTask(ctx, a.client)
+	})
+	a.Router.PUT("task/:id", func(ctx *gin.Context) {
+		editTask(ctx, a.client)
+	})
+	a.Router.DELETE("task/:id", func(ctx *gin.Context) {
+		deleteTask(ctx, a.client)
+	})
 }
