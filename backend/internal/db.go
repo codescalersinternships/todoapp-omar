@@ -33,7 +33,7 @@ func (d *DBClient) close() {
 }
 
 func (d *DBClient) getTasks() ([]task, error) {
-	rows, err := d.client.Query("SELECT * FROM tasks ORDER BY id;")
+	rows, err := d.client.Query("SELECT * FROM tasks ORDER BY id DESC;")
 	if err != nil {
 		return []task{}, err
 	}
