@@ -9,8 +9,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-var errInternalServerErrMsg = "internal server error"
-
 // getTasks 		godoc
 // @Summary 		Get tasks
 // @Description Retrieve a list of tasks from the database.
@@ -24,7 +22,7 @@ func (a *App) getTasks(c *gin.Context) {
 	if err != nil {
 		log.Fatal(err)
 		c.IndentedJSON(http.StatusInternalServerError, gin.H{
-			"err": errInternalServerErrMsg,
+			"err": "internal server error",
 		})
 		return
 	}
@@ -59,7 +57,7 @@ func (a *App) addTask(c *gin.Context) {
 	if err != nil {
 		log.Fatal(err)
 		c.IndentedJSON(http.StatusInternalServerError, gin.H{
-			"err": errInternalServerErrMsg,
+			"err": "internal server error",
 		})
 		return
 	}
@@ -103,7 +101,7 @@ func (a *App) editTask(c *gin.Context) {
 
 		log.Fatal(err)
 		c.IndentedJSON(http.StatusInternalServerError, gin.H{
-			"err": errInternalServerErrMsg,
+			"err": "internal server error",
 		})
 		return
 	}
@@ -135,7 +133,7 @@ func (a *App) deleteTask(c *gin.Context) {
 
 		log.Fatal(err)
 		c.IndentedJSON(http.StatusInternalServerError, gin.H{
-			"err": errInternalServerErrMsg,
+			"err": "internal server error",
 		})
 		return
 	}
