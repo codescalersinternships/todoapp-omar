@@ -6,7 +6,7 @@ import (
 
 	_ "github.com/codescalersinternships/todoapp-omar/docs"
 
-	"github.com/codescalersinternships/todoapp-omar/internal"
+	"github.com/codescalersinternships/todoapp-omar/app"
 )
 
 // @title 			Todoapp API
@@ -18,10 +18,10 @@ func main() {
 	flag.StringVar(&dbFilePath, "d", "./todoapp.db", "Specify the filepath of sqlite database")
 	flag.Parse()
 
-	// database client declaration
-	client := internal.DBClient{}
-
-	app := internal.NewApp(client)
+	app, err := app.NewApp(dbFilePath)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	if err := app.Run(dbFilePath); err != nil {
 		log.Fatal(err)
