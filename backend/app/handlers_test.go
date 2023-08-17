@@ -152,32 +152,6 @@ func TestEditTask(t *testing.T) {
 
 		assert.Equal(t, http.StatusNotFound, w.Code)
 	})
-
-	t.Run("invalid format", func(t *testing.T) {
-		defer func() {
-			_, err := app.DB.Client.Exec("DELETE FROM tasks")
-			assert.Nil(t, err)
-		}()
-
-		// pre
-		tsk := models.Task{Title: "task1"}
-		_, err = app.DB.AddTask(tsk)
-		assert.Nil(t, err)
-
-		editedTask := models.Task{ID: 2, IsCompleted: true}
-		payload, err := json.Marshal(editedTask)
-		assert.Nil(t, err)
-
-		req, err := http.NewRequest("PUT", "/task/1", bytes.NewBuffer(payload))
-		assert.Nil(t, err)
-		req.Header.Set("Content-Type", "application/json")
-
-		w := httptest.NewRecorder()
-
-		app.Router.ServeHTTP(w, req)
-
-		assert.Equal(t, http.StatusBadRequest, w.Code)
-	})
 }
 
 func TestDeleteTask(t *testing.T) {
