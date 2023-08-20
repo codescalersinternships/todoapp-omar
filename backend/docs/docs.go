@@ -30,10 +30,13 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/internal.task"
-                            }
+                            "$ref": "#/definitions/app.multipleTaskResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/app.errorResponse"
                         }
                     }
                 }
@@ -57,7 +60,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal.task"
+                            "$ref": "#/definitions/models.Task"
                         }
                     }
                 ],
@@ -65,7 +68,19 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/internal.task"
+                            "$ref": "#/definitions/app.taskResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "failed to read task data",
+                        "schema": {
+                            "$ref": "#/definitions/app.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/app.errorResponse"
                         }
                     }
                 }
@@ -98,7 +113,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal.task"
+                            "$ref": "#/definitions/models.Task"
                         }
                     }
                 ],
@@ -106,7 +121,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/internal.task"
+                            "$ref": "#/definitions/app.taskResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "failed to read task data",
+                        "schema": {
+                            "$ref": "#/definitions/app.errorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "task not found",
+                        "schema": {
+                            "$ref": "#/definitions/app.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/app.errorResponse"
                         }
                     }
                 }
@@ -129,13 +162,58 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "OK"
+                    },
+                    "404": {
+                        "description": "task not found",
+                        "schema": {
+                            "$ref": "#/definitions/app.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/app.errorResponse"
+                        }
                     }
                 }
             }
         }
     },
     "definitions": {
-        "internal.task": {
+        "app.errorResponse": {
+            "type": "object",
+            "properties": {
+                "err": {
+                    "type": "string"
+                }
+            }
+        },
+        "app.multipleTaskResponse": {
+            "type": "object",
+            "properties": {
+                "msg": {
+                    "type": "string"
+                },
+                "tasks": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Task"
+                    }
+                }
+            }
+        },
+        "app.taskResponse": {
+            "type": "object",
+            "properties": {
+                "msg": {
+                    "type": "string"
+                },
+                "task": {
+                    "$ref": "#/definitions/models.Task"
+                }
+            }
+        },
+        "models.Task": {
             "type": "object",
             "properties": {
                 "id": {

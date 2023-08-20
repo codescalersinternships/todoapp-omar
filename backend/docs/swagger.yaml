@@ -1,5 +1,26 @@
 definitions:
-  internal.task:
+  app.errorResponse:
+    properties:
+      err:
+        type: string
+    type: object
+  app.multipleTaskResponse:
+    properties:
+      msg:
+        type: string
+      tasks:
+        items:
+          $ref: '#/definitions/models.Task'
+        type: array
+    type: object
+  app.taskResponse:
+    properties:
+      msg:
+        type: string
+      task:
+        $ref: '#/definitions/models.Task'
+    type: object
+  models.Task:
     properties:
       id:
         type: integer
@@ -24,9 +45,11 @@ paths:
         "200":
           description: OK
           schema:
-            items:
-              $ref: '#/definitions/internal.task'
-            type: array
+            $ref: '#/definitions/app.multipleTaskResponse'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/app.errorResponse'
       summary: Get tasks
       tags:
       - tasks
@@ -40,14 +63,22 @@ paths:
         name: tags
         required: true
         schema:
-          $ref: '#/definitions/internal.task'
+          $ref: '#/definitions/models.Task'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/internal.task'
+            $ref: '#/definitions/app.taskResponse'
+        "400":
+          description: failed to read task data
+          schema:
+            $ref: '#/definitions/app.errorResponse'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/app.errorResponse'
       summary: Add new task
       tags:
       - tasks
@@ -63,6 +94,14 @@ paths:
       responses:
         "200":
           description: OK
+        "404":
+          description: task not found
+          schema:
+            $ref: '#/definitions/app.errorResponse'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/app.errorResponse'
       summary: Delete task
       tags:
       - tasks
@@ -81,14 +120,26 @@ paths:
         name: tags
         required: true
         schema:
-          $ref: '#/definitions/internal.task'
+          $ref: '#/definitions/models.Task'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/internal.task'
+            $ref: '#/definitions/app.taskResponse'
+        "400":
+          description: failed to read task data
+          schema:
+            $ref: '#/definitions/app.errorResponse'
+        "404":
+          description: task not found
+          schema:
+            $ref: '#/definitions/app.errorResponse'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/app.errorResponse'
       summary: Edit task
       tags:
       - tasks
