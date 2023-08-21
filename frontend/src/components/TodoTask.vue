@@ -6,7 +6,8 @@ export default defineComponent({
     return {
       currentTaskTitle: this.task.title,
       isTaskCompleted: this.task.is_completed,
-      isTaskEditEnabled: false
+      isTaskEditEnabled: false,
+      apiBaseUrl: import.meta.env.VITE_API_BASE_URL
     }
   },
   props: ['task'],
@@ -15,7 +16,7 @@ export default defineComponent({
       try {
         await this.axios({
           method: 'DELETE',
-          url: `http://localhost:8080/task/${this.task.id}`
+          url: this.apiBaseUrl + `/task/${this.task.id}`
         })
 
         this.$emit('deleteTask', this.task.id)
@@ -34,7 +35,7 @@ export default defineComponent({
       try {
         await this.axios({
           method: 'PUT',
-          url: `http://localhost:8080/task/${this.task.id}`,
+          url: this.apiBaseUrl + `/task/${this.task.id}`,
           data: {
             id: this.task.id,
             title: this.currentTaskTitle,

@@ -15,14 +15,15 @@ export default defineComponent({
     return {
       tasks: [] as Task[],
       showErrMsg: ref(false),
-      errMsg: ''
+      errMsg: '',
+      apiBaseUrl: import.meta.env.VITE_API_BASE_URL
     }
   },
   async beforeMount() {
     try {
-      const response = await this.axios.get('http://localhost:8080/task')
+      const response = await this.axios.get(this.apiBaseUrl + '/task')
 
-      this.tasks = response.data
+      this.tasks = response.data.tasks
     } catch {
       this.showErr('could not get your tasks')
     }

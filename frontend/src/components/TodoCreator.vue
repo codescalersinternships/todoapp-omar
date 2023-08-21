@@ -4,7 +4,8 @@ import { defineComponent } from 'vue'
 export default defineComponent({
   data() {
     return {
-      taskTitle: ''
+      taskTitle: '',
+      apiBaseUrl: import.meta.env.VITE_API_BASE_URL
     }
   },
   methods: {
@@ -13,14 +14,14 @@ export default defineComponent({
       try {
         const response = await this.axios({
           method: 'POST',
-          url: 'http://localhost:8080/task',
+          url: this.apiBaseUrl + '/task',
           data: {
             title: this.taskTitle
           }
         })
 
         this.taskTitle = ''
-        this.$emit('addTask', response.data)
+        this.$emit('addTask', response.data.task)
       } catch {
         this.$emit('showErr', 'could not add new task')
       }
