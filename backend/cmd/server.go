@@ -15,15 +15,17 @@ import (
 // @host 				localhost:8080
 func main() {
 	var dbFilePath string
+	var port int
 	flag.StringVar(&dbFilePath, "d", "./todoapp.db", "Specify the filepath of sqlite database")
+	flag.IntVar(&port, "p", 8080, "Specify the port number")
 	flag.Parse()
 
-	app, err := app.NewApp(dbFilePath)
+	app, err := app.NewApp(dbFilePath, port)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	if err := app.Run(dbFilePath); err != nil {
+	if err := app.Run(); err != nil {
 		log.Fatal(err)
 	}
 }

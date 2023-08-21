@@ -16,11 +16,16 @@ import (
 
 func TestAddTask(t *testing.T) {
 	dir := t.TempDir()
-	app, err := NewApp(filepath.Join(dir, "test.db"))
+	app, err := NewApp(filepath.Join(dir, "test.db"), 8080)
+	assert.Nil(t, err)
+
+	err = app.DB.Connect()
 	assert.Nil(t, err)
 	defer app.DB.Close()
 
-	app.Router = gin.Default()
+	err = app.DB.Migrate()
+	assert.Nil(t, err)
+
 	app.registerRoutes()
 
 	newTask := map[string]string{
@@ -50,11 +55,16 @@ func TestAddTask(t *testing.T) {
 
 func TestGetTasks(t *testing.T) {
 	dir := t.TempDir()
-	app, err := NewApp(filepath.Join(dir, "test.db"))
+	app, err := NewApp(filepath.Join(dir, "test.db"), 8080)
+	assert.Nil(t, err)
+
+	err = app.DB.Connect()
 	assert.Nil(t, err)
 	defer app.DB.Close()
 
-	app.Router = gin.Default()
+	err = app.DB.Migrate()
+	assert.Nil(t, err)
+
 	app.registerRoutes()
 
 	// pre
@@ -91,11 +101,16 @@ func TestGetTasks(t *testing.T) {
 
 func TestEditTask(t *testing.T) {
 	dir := t.TempDir()
-	app, err := NewApp(filepath.Join(dir, "test.db"))
+	app, err := NewApp(filepath.Join(dir, "test.db"), 8080)
+	assert.Nil(t, err)
+
+	err = app.DB.Connect()
 	assert.Nil(t, err)
 	defer app.DB.Close()
 
-	app.Router = gin.Default()
+	err = app.DB.Migrate()
+	assert.Nil(t, err)
+
 	app.registerRoutes()
 
 	t.Run("valid", func(t *testing.T) {
@@ -156,11 +171,16 @@ func TestEditTask(t *testing.T) {
 
 func TestDeleteTask(t *testing.T) {
 	dir := t.TempDir()
-	app, err := NewApp(filepath.Join(dir, "test.db"))
+	app, err := NewApp(filepath.Join(dir, "test.db"), 8080)
+	assert.Nil(t, err)
+
+	err = app.DB.Connect()
 	assert.Nil(t, err)
 	defer app.DB.Close()
 
-	app.Router = gin.Default()
+	err = app.DB.Migrate()
+	assert.Nil(t, err)
+
 	app.registerRoutes()
 
 	t.Run("valid", func(t *testing.T) {

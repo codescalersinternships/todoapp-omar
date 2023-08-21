@@ -14,17 +14,17 @@ type Task struct {
 
 // GetTasks get all tasks from db
 func (d *DBClient) GetTasks() ([]Task, error) {
-	rows, err := d.Client.Query("SELECT * FROM tasks ORDER BY id DESC;")
+	q, err := d.Client.Query("SELECT * FROM tasks ORDER BY id DESC;")
 	if err != nil {
 		return []Task{}, err
 	}
-	defer rows.Close()
+	defer q.Close()
 
 	tasks := []Task{}
 
-	for rows.Next() {
+	for q.Next() {
 		t := Task{}
-		if err := rows.Scan(&t.ID, &t.Title, &t.IsCompleted); err != nil {
+		if err := q.Scan(&t.ID, &t.Title, &t.IsCompleted); err != nil {
 			return []Task{}, err
 		}
 		tasks = append(tasks, t)

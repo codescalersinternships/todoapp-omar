@@ -5,20 +5,22 @@ import (
 	_ "embed"
 )
 
-// NewDBClient connects sqlite database and returns DBClient
-func NewDBClient(dbFilePath string) (DBClient, error) {
-	d := DBClient{}
-
-	// connect database
-	var err error
-	d.Client, err = sql.Open("sqlite3", dbFilePath)
-
-	return d, err
+// NewDBClient is the factory of DBClient
+func NewDBClient(dbFilePath string) DBClient {
+	return DBClient{FilePath: dbFilePath}
 }
 
 // DBClient used to start, close and make queries on database
 type DBClient struct {
-	Client *sql.DB
+	Client   *sql.DB
+	FilePath string
+}
+
+// Connect connects sqlite database
+func (d *DBClient) Connect() error {
+	var err error
+	d.Client, err = sql.Open("sqlite3", d.FilePath)
+	return err
 }
 
 //go:embed db/000createTables.sql

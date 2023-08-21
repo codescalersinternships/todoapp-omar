@@ -15,4 +15,4 @@ RUN apt-get update && \
 
 RUN go build -a -o server ./cmd/server.go
 
-CMD [ "./server", "-d", "./data/todoapp.db" ]
+CMD [ "./server", "-d", "./data/todoapp.db", "-p", "8080" ]

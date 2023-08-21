@@ -1,6 +1,9 @@
 package app
 
 import (
+	"errors"
+	"fmt"
+
 	"github.com/codescalersinternships/todoapp-omar/models"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -9,37 +12,48 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
+// ErrInvalidPort is invalid port number error
+var ErrInvalidPort = errors.New("invalid port number, insert a port number from 1 to 65535")
+
 // NewApp is the factory of App
-func NewApp(dbFilePath string) (App, error) {
-	db, err := models.NewDBClient(dbFilePath)
-	if err != nil {
-		return App{}, err
+func NewApp(dbFilePath string, port int) (App, error) {
+	if port < 1 || port > 65535 {
+		return App{}, ErrInvalidPort
 	}
 
-	if err := db.Migrate(); err != nil {
-		return App{}, err
-	}
-
-	return App{DB: db, Router: gin.Default()}, nil
+	return App{
+		DB:     models.NewDBClient(dbFilePath),
+		Router: gin.Default(),
+		Port:   port,
+	}, nil
 }
 
 // App is the structure that initializes the entire app
 type App struct {
 	DB     models.DBClient
 	Router *gin.Engine
+	Port   int
 }
 
 // Run runs server
-func (a *App) Run(dbFilePath string) error {
+func (a *App) Run() error {
+	if err := a.DB.Connect(); err != nil {
+		return err
+	}
 	defer a.DB.Close()
 
-	a.Router.Use(cors.Default())
+	if err := a.DB.Migrate(); err != nil {
+		return err
+	}
+
 	a.registerRoutes()
 
-	return a.Router.Run(":8080")
+	return a.Router.Run(fmt.Sprintf(":%d", a.Port))
 }
 
 func (a *App) registerRoutes() {
+	a.Router.Use(cors.Default())
+
 	a.Router.GET("task", a.getTasks)
 	a.Router.POST("task", a.addTask)
 	a.Router.PUT("task/:id", a.editTask)
