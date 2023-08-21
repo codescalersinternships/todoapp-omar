@@ -13,6 +13,6 @@ RUN apt-get update && \
     apt-get install -y gcc && \
     apt-get install -y libsqlite3-dev
 
-RUN go build -a -o app ./cmd/server.go
+RUN go build -a -o server ./cmd/server.go
 
-CMD [ "./app", "-d", "./internal/data/todoapp.db" ]
+CMD [ "./server", "-d", "./data/todoapp.db" ]
