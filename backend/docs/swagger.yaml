@@ -1,0 +1,146 @@
+definitions:
+  app.errorResponse:
+    properties:
+      err:
+        type: string
+    type: object
+  app.multipleTaskResponse:
+    properties:
+      msg:
+        type: string
+      tasks:
+        items:
+          $ref: '#/definitions/models.Task'
+        type: array
+    type: object
+  app.taskResponse:
+    properties:
+      msg:
+        type: string
+      task:
+        $ref: '#/definitions/models.Task'
+    type: object
+  models.Task:
+    properties:
+      id:
+        type: integer
+      is_completed:
+        type: boolean
+      title:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: A Todoapp API in Go using Gin framework and sqlite3
+  title: Todoapp API
+  version: "1.0"
+paths:
+  /task:
+    get:
+      description: Retrieve a list of tasks from the database.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/app.multipleTaskResponse'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/app.errorResponse'
+      summary: Get tasks
+      tags:
+      - tasks
+    post:
+      consumes:
+      - application/json
+      description: Add a new task to the database.
+      parameters:
+      - description: New task object
+        in: body
+        name: tags
+        required: true
+        schema:
+          $ref: '#/definitions/models.Task'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/app.taskResponse'
+        "400":
+          description: failed to read task data
+          schema:
+            $ref: '#/definitions/app.errorResponse'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/app.errorResponse'
+      summary: Add new task
+      tags:
+      - tasks
+  /task/{id}:
+    delete:
+      description: Delete an existing task from the database.
+      parameters:
+      - description: Task ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+        "404":
+          description: task not found
+          schema:
+            $ref: '#/definitions/app.errorResponse'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/app.errorResponse'
+      summary: Delete task
+      tags:
+      - tasks
+    put:
+      consumes:
+      - application/json
+      description: Edit an existing task in the database.
+      parameters:
+      - description: Task ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Edited task object
+        in: body
+        name: tags
+        required: true
+        schema:
+          $ref: '#/definitions/models.Task'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/app.taskResponse'
+        "400":
+          description: failed to read task data
+          schema:
+            $ref: '#/definitions/app.errorResponse'
+        "404":
+          description: task not found
+          schema:
+            $ref: '#/definitions/app.errorResponse'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/app.errorResponse'
+      summary: Edit task
+      tags:
+      - tasks
+swagger: "2.0"
