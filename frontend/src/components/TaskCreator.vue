@@ -14,7 +14,7 @@ export default defineComponent({
       try {
         const response = await this.axios({
           method: 'POST',
-          url: this.apiBaseUrl + '/task',
+          url: `${this.apiBaseUrl}/task`,
           data: {
             title: this.taskTitle
           }

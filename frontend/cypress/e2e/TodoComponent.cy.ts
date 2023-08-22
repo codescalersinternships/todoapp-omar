@@ -2,7 +2,7 @@
 
 describe('template spec', () => {
   beforeEach(() => {
-    cy.visit('localhost:5173')
+    cy.visit(Cypress.env('web_base_url'))
   })
 
   it('should add a new todo to the list', () => {

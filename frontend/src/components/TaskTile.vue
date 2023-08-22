@@ -16,7 +16,7 @@ export default defineComponent({
       try {
         await this.axios({
           method: 'DELETE',
-          url: this.apiBaseUrl + `/task/${this.task.id}`
+          url: `${this.apiBaseUrl}/task/${this.task.id}`
         })
 
         this.$emit('deleteTask', this.task.id)
@@ -35,7 +35,7 @@ export default defineComponent({
       try {
         await this.axios({
           method: 'PUT',
-          url: this.apiBaseUrl + `/task/${this.task.id}`,
+          url: `${this.apiBaseUrl}/task/${this.task.id}`,
           data: {
             id: this.task.id,
             title: this.currentTaskTitle,
